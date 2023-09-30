@@ -1,0 +1,31 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon C:/Users/skhva/IdeaProjects/airbnb_clone/api/index.ts"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "C:/Users/skhva/IdeaProjects/airbnb_clone/api/index.ts"
+    ],
+    "ext": "ts, js, mjs",
+    "exec": "ts-node C:/Users/skhva/IdeaProjects/airbnb_clone/api/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "mongoose": "^7.5.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.14",
+    "@types/express": "^4.17.18",
+    "nodemon": "^3.0.1",
+    "ts-node": "^10.9.1"
+  }
+}
