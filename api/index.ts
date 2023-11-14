@@ -6,9 +6,11 @@ import mongoose from 'mongoose';
 import 'dotenv/config'
 const User = require('./models/user');
 //import userModel from './models/user';
-import bcryptjs from 'bcryptjs'
+import bcryptjs from 'bcryptjs'; // package to encrypt passwords
+import jwt from "jsonwebtoken"; // package to create webtoken
 
 const bcryptSalt = bcryptjs.genSaltSync(10); /*In the bcryptjs library, the genSalt() function is used to generate a salt that can be used for hashing passwords. Salting is a crucial aspect of password hashing, adding additional randomness to each hashed password. This helps enhance security by preventing attackers from using precomputed tables (rainbow tables) for common passwords.*/
+const jwtSecret: string = "addasdsdspgfkg"; // secret wich we use to create token
 
 const cors_policy = cors({
                                     credentials:true,
@@ -54,19 +56,22 @@ app.post('/login', async (req: Request, res: Response) => {
     if(userDoc){// if we found in DB doc with provided email. => check if password the same
         const isPassOk = bcryptjs.compareSync(password, userDoc.password)// because need unencrypted
         if(isPassOk){
-            res.json('pass OK');
-        } else {
-            res.status(422).json("pass NOT OK");
-        }
-    } else{
-        res.status(422).json("not found");
+            jwt.sign({email:userDoc.email, id:userDoc._id}, jwtSecret, {}, (err, token) =>{
+                if(err){
+                    throw err;
+                }
+                else {
+                    res.cookie('token', token, {secure: true}).json("pass OK");
+                }
+            }); // create token which has some user info (email and _id from DB)
+
+        } else{
+            res.status(422).json("pass not ok");
     }
-
-
-
+}
+    else {
+        res.json("not found");
+    }
 })
-
-
-
 
 app.listen(4000, ()=> console.log("Server listening on port 40000"))
