@@ -5,12 +5,18 @@ const json = express.json();
 import mongoose from 'mongoose';
 import 'dotenv/config'
 const User = require('./models/user');
-//import userModel from './models/user';
+import {userModel} from './models/user';
 import bcryptjs from 'bcryptjs'; // package to encrypt passwords
 import jwt from "jsonwebtoken"; // package to create webtoken
+import cookieParser from 'cookie-parser';
+
+
+
 
 const bcryptSalt = bcryptjs.genSaltSync(10); /*In the bcryptjs library, the genSalt() function is used to generate a salt that can be used for hashing passwords. Salting is a crucial aspect of password hashing, adding additional randomness to each hashed password. This helps enhance security by preventing attackers from using precomputed tables (rainbow tables) for common passwords.*/
 const jwtSecret: string = "addasdsdspgfkg"; // secret wich we use to create token
+
+
 
 const cors_policy = cors({
                                     credentials:true,
@@ -24,7 +30,7 @@ if (process.env.MONGO_CONNECTION_URL) {
     console.error("MONGO_CONNECTION_URL is not defined in the environment variables.");
 }
 
-
+app.use(cookieParser());
 app.use(cors_policy, json)
 app.get('/test', (req: Request, res: Response)=>{
     res.json('test ok')
@@ -51,7 +57,7 @@ app.post("/register",async (req: Request, res: Response) =>{
 app.post('/login', async (req: Request, res: Response) => {
     const {email, password} = req.body;
     // we looking for if the user with given from axios post request email and password exist in DB
-    const userDoc = await User.findOne({email: email}); /*In Mongoose, which is an Object Data Modeling (ODM) library for MongoDB and Node.js, the findOne() function is used to query a MongoDB collection and retrieve a single document that matches the specified criteria. This function is particularly useful when you want to find one document based on certain conditions.
+    const userDoc = await userModel.findOne({email: email}); /*In Mongoose, which is an Object Data Modeling (ODM) library for MongoDB and Node.js, the findOne() function is used to query a MongoDB collection and retrieve a single document that matches the specified criteria. This function is particularly useful when you want to find one document based on certain conditions.
 */
     if(userDoc){// if we found in DB doc with provided email. => check if password the same
         const isPassOk = bcryptjs.compareSync(password, userDoc.password)// because need unencrypted
@@ -61,7 +67,7 @@ app.post('/login', async (req: Request, res: Response) => {
                     throw err;
                 }
                 else {
-                    res.cookie('token', token, {secure: true}).json("pass OK");
+                    res.cookie('token', token).json(userDoc);
                 }
             }); // create token which has some user info (email and _id from DB)
 
@@ -73,5 +79,18 @@ app.post('/login', async (req: Request, res: Response) => {
         res.json("not found");
     }
 })
+
+
+app.get('/profile', (req: Request, res: Response) => {
+    const{token} = req.cookies;
+    if(token){
+        res.json({token});
+    }else {
+        res.json(null);
+    }
+
+
+})
+
 
 app.listen(4000, ()=> console.log("Server listening on port 40000"))

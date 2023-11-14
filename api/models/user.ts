@@ -1,28 +1,25 @@
-import mongoose from "mongoose";
-import{Schema,   InferSchemaType} from "mongoose";
+import mongoose, { Schema, Document, Model } from "mongoose";
+import { UserDocument, UserModel} from "../interfaces";
 
-// schema for our model
-interface UserDocument extends Document {
-    name: String;
-    email: String;
-    password: String;
-}
+// // Interface for user document
+// interface UserDocument extends Document {
+//     name: string;
+//     email: string;
+//     password: string;
+// }
+//
+// // Interface for user model (extends the UserDocument interface)
+// interface UserModel extends Model<UserDocument> {}
 
-
-const userSchema  = new Schema<UserDocument>({
+// Define the user schema
+const userSchema = new Schema<UserDocument>({
     name: String,
-    email:{type: String, unique: true, required: true},
-    password: {type: String, required: true},
+    email: { type: String, unique: true, required: true },
+    password: { type: String, required: true },
+});
 
-})
+// Define the user model using the schema
+export const userModel = mongoose.model<UserDocument, UserModel>("User", userSchema);
 
-//type User = InferSchemaType<typeof userSchema>
-
-// model for user schema
-const userModel: UserDocument = mongoose.model("User", userSchema);
-
-module.exports = userModel;
-
-
-
-
+// Export the user model
+//export default userModel;
