@@ -5,10 +5,11 @@ const json = express.json();
 import mongoose from 'mongoose';
 import 'dotenv/config'
 const User = require('./models/user');
-import {userModel} from './models/user';
+import  {userModel} from './models/user';
 import bcryptjs from 'bcryptjs'; // package to encrypt passwords
 import jwt from "jsonwebtoken"; // package to create webtoken
 import cookieParser from 'cookie-parser';
+import { UserDocument} from "./interfaces";
 
 
 
@@ -18,10 +19,10 @@ const jwtSecret: string = "addasdsdspgfkg"; // secret wich we use to create toke
 
 
 
-const cors_policy = cors({
-                                    credentials:true,
-                                    origin:'http://localhost:5173' // we allow fron-end app to communicate with current backend app
-                                })
+// const cors_policy = cors({
+//                                     credentials:true,
+//                                     origin:'http://127.0.0.1:5173' // we allow front-end app to communicate with current backend app
+//                                 })
 
 //mongoose.connect(process.env.MONGO_CONNECTION_URL);
 if (process.env.MONGO_CONNECTION_URL) {
@@ -31,7 +32,12 @@ if (process.env.MONGO_CONNECTION_URL) {
 }
 
 app.use(cookieParser());
-app.use(cors_policy, json)
+app.use(json);
+app.use(cors({
+    credentials: true,
+    origin: 'http://localhost:5173',
+}));
+
 app.get('/test', (req: Request, res: Response)=>{
     res.json('test ok')
 })
@@ -62,7 +68,11 @@ app.post('/login', async (req: Request, res: Response) => {
     if(userDoc){// if we found in DB doc with provided email. => check if password the same
         const isPassOk = bcryptjs.compareSync(password, userDoc.password)// because need unencrypted
         if(isPassOk){
-            jwt.sign({email:userDoc.email, id:userDoc._id}, jwtSecret, {}, (err, token) =>{
+            jwt.sign({
+                email:userDoc.email,
+                id:userDoc._id,
+                name:userDoc.name
+            }, jwtSecret, {}, (err, token) =>{
                 if(err){
                     throw err;
                 }
@@ -80,17 +90,16 @@ app.post('/login', async (req: Request, res: Response) => {
     }
 })
 
-
 app.get('/profile', (req: Request, res: Response) => {
     const{token} = req.cookies;
     if(token){
-        res.json({token});
+        jwt.verify(token, jwtSecret, {}, (err, user)=> {
+            if(err) throw err;
+            res.json(user);
+        })
     }else {
         res.json(null);
     }
-
-
 })
 
-
-app.listen(4000, ()=> console.log("Server listening on port 40000"))
+app.listen(4000, ()=> console.log("Server listening on port 40000"));
