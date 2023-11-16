@@ -1,15 +1,14 @@
 import express, {Request, Response} from 'express';
 import cors from 'cors';
 const app = express();
-const json = express.json();
-import mongoose from 'mongoose';
+const mongoose = require("mongoose");
 import 'dotenv/config'
 const User = require('./models/user');
-import  {userModel} from './models/user';
 import bcryptjs from 'bcryptjs'; // package to encrypt passwords
 import jwt from "jsonwebtoken"; // package to create webtoken
 import cookieParser from 'cookie-parser';
-import { UserDocument} from "./interfaces";
+import {UserModel} from "./models/user";
+
 
 
 
@@ -17,12 +16,6 @@ import { UserDocument} from "./interfaces";
 const bcryptSalt = bcryptjs.genSaltSync(10); /*In the bcryptjs library, the genSalt() function is used to generate a salt that can be used for hashing passwords. Salting is a crucial aspect of password hashing, adding additional randomness to each hashed password. This helps enhance security by preventing attackers from using precomputed tables (rainbow tables) for common passwords.*/
 const jwtSecret: string = "addasdsdspgfkg"; // secret wich we use to create token
 
-
-
-// const cors_policy = cors({
-//                                     credentials:true,
-//                                     origin:'http://127.0.0.1:5173' // we allow front-end app to communicate with current backend app
-//                                 })
 
 //mongoose.connect(process.env.MONGO_CONNECTION_URL);
 if (process.env.MONGO_CONNECTION_URL) {
@@ -32,10 +25,10 @@ if (process.env.MONGO_CONNECTION_URL) {
 }
 
 app.use(cookieParser());
-app.use(json);
+app.use(express.json());
 app.use(cors({
     credentials: true,
-    origin: 'http://localhost:5173',
+    origin: 'http://localhost:5173'
 }));
 
 app.get('/test', (req: Request, res: Response)=>{
@@ -46,6 +39,7 @@ app.get('/test', (req: Request, res: Response)=>{
 app.post("/register",async (req: Request, res: Response) =>{
    // console.log(req.body)
     const {name, email, password} = req.body;
+
     try{
         // encrypt first, to hide password, use bcyptjs library
         const userDoc = await User.create({
@@ -63,37 +57,36 @@ app.post("/register",async (req: Request, res: Response) =>{
 app.post('/login', async (req: Request, res: Response) => {
     const {email, password} = req.body;
     // we looking for if the user with given from axios post request email and password exist in DB
-    const userDoc = await userModel.findOne({email: email}); /*In Mongoose, which is an Object Data Modeling (ODM) library for MongoDB and Node.js, the findOne() function is used to query a MongoDB collection and retrieve a single document that matches the specified criteria. This function is particularly useful when you want to find one document based on certain conditions.
+    const userDoc = await UserModel.findOne({email}); /*In Mongoose, which is an Object Data Modeling (ODM) library for MongoDB and Node.js, the findOne() function is used to query a MongoDB collection and retrieve a single document that matches the specified criteria. This function is particularly useful when you want to find one document based on certain conditions.
 */
+    console.log(userDoc)
     if(userDoc){// if we found in DB doc with provided email. => check if password the same
-        const isPassOk = bcryptjs.compareSync(password, userDoc.password)// because need unencrypted
+
+            const isPassOk = bcryptjs.compareSync(password, userDoc.password)// because need unencrypted
         if(isPassOk){
-            jwt.sign({
+            jwt.sign({ // token creation. For token creation token using user`s info
                 email:userDoc.email,
                 id:userDoc._id,
                 name:userDoc.name
             }, jwtSecret, {}, (err, token) =>{
-                if(err){
+                if(err)
                     throw err;
-                }
-                else {
-                    res.cookie('token', token).json(userDoc);
-                }
-            }); // create token which has some user info (email and _id from DB)
+                    res.cookie('token', token).json(userDoc);// If error not occure we responde with token
+            });
 
         } else{
             res.status(422).json("pass not ok");
     }
 }
     else {
-        res.json("not found");
+        res.status(422).json("not found");
     }
 })
 
 app.get('/profile', (req: Request, res: Response) => {
     const{token} = req.cookies;
     if(token){
-        jwt.verify(token, jwtSecret, {}, (err, user)=> {
+        jwt.verify(token, jwtSecret, {}, (err, user)=> { // to decrypt token, which has encrypted info (email, id, name), which come from encryption within login endpoint
             if(err) throw err;
             res.json(user);
         })

@@ -12,11 +12,10 @@ export default function LoginPage(){
     async function handleLoginSubmit(ev){
         ev.preventDefault();
         try{
-           const response = await axios.post('/login', {email, password});
-           setUser(response.data);
-           alert("Login successful");
-
-           setRedirect(true);
+            const {data} = await axios.post('/login', {email, password});
+            setUser(data);
+            alert("Login successful");
+            setRedirect(true);
         }
         catch(e){
             alert("Login failed");
@@ -35,10 +34,12 @@ export default function LoginPage(){
                 <form className="max-w-md mx-auto" onSubmit={handleLoginSubmit}>
                     <input type="email"
                            placeholder='your@email.com'
-                           value={email} onChange={ev => setEmail(ev.target.value)}/>
+                           value={email}
+                           onChange={ev => setEmail(ev.target.value)}/>
                     <input type="password"
                            placeholder='your password'
-                           value={password} onChange={ev => setPassword(ev.target.value)}/>
+                           value={password}
+                           onChange={ev => setPassword(ev.target.value)}/>
                     <button className="primary"> Login </button>
                     <div className='text-center py-2 text-gray-500'> Don`t have an account yet? <Link className='underline text-black' to={'/register'}> Register now</Link>
                     </div>
@@ -46,9 +47,5 @@ export default function LoginPage(){
             </div>
 
         </div>
-
     )
-
-
-
 }
