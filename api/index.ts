@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 import 'dotenv/config'
 const User = require('./models/user');
 import bcryptjs from 'bcryptjs'; // package to encrypt passwords
-import jwt from "jsonwebtoken"; // package to create webtoken
+import jwt, {JwtPayload} from "jsonwebtoken"; // package to create webtoken
 import cookieParser from 'cookie-parser';
 import {UserModel} from "./models/user";
 
@@ -67,7 +67,7 @@ app.post('/login', async (req: Request, res: Response) => {
             jwt.sign({ // token creation. For token creation token using user`s info
                 email:userDoc.email,
                 id:userDoc._id,
-                name:userDoc.name
+
             }, jwtSecret, {}, (err, token) =>{
                 if(err)
                     throw err;
@@ -86,9 +86,10 @@ app.post('/login', async (req: Request, res: Response) => {
 app.get('/profile', (req: Request, res: Response) => {
     const{token} = req.cookies;
     if(token){
-        jwt.verify(token, jwtSecret, {}, (err, user)=> { // to decrypt token, which has encrypted info (email, id, name), which come from encryption within login endpoint
+        jwt.verify(token, jwtSecret, {}, async (err, userData: any )=> { // to decrypt token, which has encrypted info (email, id, name), which come from encryption within login endpoint
             if(err) throw err;
-            res.json(user);
+            const {name, email, _id} = await UserModel.findById(userData.id)
+            res.json({name, email, _id});
         })
     }else {
         res.json(null);
