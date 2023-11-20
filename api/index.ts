@@ -96,4 +96,14 @@ app.get('/profile', (req: Request, res: Response) => {
     }
 })
 
+
+app.post('/logout', (req: Request, res: Response) => {
+    res.cookie("token", "").json(true); // in order to logout we send cookie with empty string
+
+})
+
+
+
+
+
 app.listen(4000, ()=> console.log("Server listening on port 40000"));
