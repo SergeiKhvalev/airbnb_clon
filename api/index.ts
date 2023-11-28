@@ -8,7 +8,7 @@ import bcryptjs from 'bcryptjs'; // package to encrypt passwords
 import jwt, {JwtPayload} from "jsonwebtoken"; // package to create webtoken
 import cookieParser from 'cookie-parser';
 import {UserModel} from "./models/user";
-
+const imageDownloader = require('image-downloader');
 
 
 
@@ -102,7 +102,29 @@ app.post('/logout', (req: Request, res: Response) => {
 
 })
 
+app.post('/upload-by-link',  (req: Request, res: Response) =>{
+    const {link} = req.body;
+    const newName = Date.now() +'.jpg';
 
+   const options = {
+        url: link,
+        dest: __dirname + "api/uploads"+ newName,     // will be saved to /path/to/dest/photo.jpg
+    };
+
+    imageDownloader.image(options)
+        .then(({ filename }:{filename:string} )=> {
+            console.log('Saved to', filename); // saved to /path/to/dest/photo.jpg
+        })
+        .catch((err: Error) => console.error(err));
+
+
+    // await imageDownloader.image({ // we use image-downloader library
+    //     url: link,
+    //     dest: __dirname + "api/uploads"+ newName,
+    // })
+    res.json(newName);
+
+})
 
 
 
