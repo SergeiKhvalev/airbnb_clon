@@ -40,8 +40,13 @@ export default function PlacesPage(){
 
    async function addPhotoByLink(ev){
         ev.preventDefault();
-      await axios.post('/upload-by-link', {link: photoLink})
+      const {data: filename} = await axios.post('/upload-by-link', {link: photoLink}) // we grab file name from relevant endpoint. {data: filename} - we assign data to variable filename
 
+       //we add photo from link to addPhoto state
+       setAddedPhotos(prev => {
+           return [...prev, filename]
+       })
+       setPhotoLink([]);// we reset setPhoto state to empty state after each addPhoto
     }
 
     return (<div>
@@ -73,6 +78,12 @@ export default function PlacesPage(){
                                 <button onClick={addPhotoByLink} className="bg-gray-200 px-4 rounded-2xl">Add&nbsp;photo</button>
                             </div>
                             <div className="mt-2 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                                /*to see added from link photo on screen*/
+                                {addedPhotos.length > 0 && addedPhotos.map(link =>(
+                                     <div>
+                                        {link}
+                                    </div>
+                                ))}
                                 <button className=" flex gap-1 justify-center border bg-transparent rounded-2xl p-8 text-2xl text-gray-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                          stroke-width="1.5" stroke="currentColor" className="w-8 h-8">

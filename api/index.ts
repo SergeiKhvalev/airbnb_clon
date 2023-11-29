@@ -25,6 +25,7 @@ if (process.env.MONGO_CONNECTION_URL) {
 }
 
 app.use(cookieParser());
+app.use('/uploads', express.static(__dirname+'/uploads'));
 app.use(express.json());
 app.use(cors({
     credentials: true,
@@ -59,7 +60,7 @@ app.post('/login', async (req: Request, res: Response) => {
     // we looking for if the user with given from axios post request email and password exist in DB
     const userDoc = await UserModel.findOne({email}); /*In Mongoose, which is an Object Data Modeling (ODM) library for MongoDB and Node.js, the findOne() function is used to query a MongoDB collection and retrieve a single document that matches the specified criteria. This function is particularly useful when you want to find one document based on certain conditions.
 */
-    console.log(userDoc)
+    //console.log(userDoc)
     if(userDoc){// if we found in DB doc with provided email. => check if password the same
 
             const isPassOk = bcryptjs.compareSync(password, userDoc.password)// because need unencrypted
@@ -104,15 +105,17 @@ app.post('/logout', (req: Request, res: Response) => {
 
 app.post('/upload-by-link',  (req: Request, res: Response) =>{
     const {link} = req.body;
-    const newName = Date.now() +'.jpg';
+    console.log(typeof link[0]);
+    const newName = "photo"+Date.now() +'.jpg';
+    console.log(__dirname+"\\uploads")
 
    const options = {
-        url: link,
-        dest: __dirname + "api/uploads"+ newName,     // will be saved to /path/to/dest/photo.jpg
+        url: link[0],
+        dest: __dirname + "\\uploads"+ newName,     // will be saved to /path/to/dest/photo.jpg
     };
 
     imageDownloader.image(options)
-        .then(({ filename }:{filename:string} )=> {
+        .then(({ filename }: any)=> {
             console.log('Saved to', filename); // saved to /path/to/dest/photo.jpg
         })
         .catch((err: Error) => console.error(err));
@@ -128,4 +131,4 @@ app.post('/upload-by-link',  (req: Request, res: Response) =>{
 
 
 
-app.listen(4000, ()=> console.log("Server listening on port 40000"));
+app.listen(4000, ()=> console.log("Server listening on port 4000"));
