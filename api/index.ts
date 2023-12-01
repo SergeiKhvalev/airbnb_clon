@@ -25,7 +25,7 @@ if (process.env.MONGO_CONNECTION_URL) {
 }
 
 app.use(cookieParser());
-app.use('/uploads', express.static(__dirname+'/uploads'));
+app.use('/uploads', express.static(__dirname+'/uploads')); // that middleware to display photos of houses in browser
 app.use(express.json());
 app.use(cors({
     credentials: true,
@@ -103,29 +103,37 @@ app.post('/logout', (req: Request, res: Response) => {
 
 })
 
-app.post('/upload-by-link',  (req: Request, res: Response) =>{
-    const {link} = req.body;
-    console.log(typeof link[0]);
+
+
+
+app.post('/upload-by-link',   async (req: Request, res: Response) =>{
+   /* also walid code
+   const {link} = req.body;
     const newName = "photo"+Date.now() +'.jpg';
-    console.log(__dirname+"\\uploads")
 
-   const options = {
+    const options = {
         url: link[0],
-        dest: __dirname + "\\uploads"+ newName,     // will be saved to /path/to/dest/photo.jpg
+        dest: __dirname + "\\uploads\\"+ newName,     // will be saved to /path/to/dest/photo.jpg
     };
-
-    imageDownloader.image(options)
-        .then(({ filename }: any)=> {
+  await  imageDownloader.image(options)
+        .then(({ filename }: {filename:string})=> {
             console.log('Saved to', filename); // saved to /path/to/dest/photo.jpg
         })
         .catch((err: Error) => console.error(err));
 
 
-    // await imageDownloader.image({ // we use image-downloader library
-    //     url: link,
-    //     dest: __dirname + "api/uploads"+ newName,
-    // })
     res.json(newName);
+    */
+
+    const {link} = req.body;
+    const newName = "photo"+Date.now() +'.jpg';
+    await imageDownloader.image({
+        url: link[0],
+        dest: __dirname +"\\uploads\\" + newName,
+    });
+    res.json(newName)
+
+
 
 })
 

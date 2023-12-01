@@ -77,14 +77,14 @@ export default function PlacesPage(){
                                     type="text" placeholder={'Add using link.....jpg.'}/>
                                 <button onClick={addPhotoByLink} className="bg-gray-200 px-4 rounded-2xl">Add&nbsp;photo</button>
                             </div>
-                            <div className="mt-2 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                                /*to see added from link photo on screen*/
+                            <div className="mt-2 grid gar-2 grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+
                                 {addedPhotos.length > 0 && addedPhotos.map(link =>(
                                      <div>
-                                        {link}
+                                        <img className="rounded-2xl" src={"http://localhost:4000/uploads/"+link} alt="house-photo"/>
                                     </div>
                                 ))}
-                                <button className=" flex gap-1 justify-center border bg-transparent rounded-2xl p-8 text-2xl text-gray-600">
+                                <button className=" flex items-center gap-1 justify-center border bg-transparent rounded-2xl p-4 text-2xl text-gray-600">
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                                          stroke-width="1.5" stroke="currentColor" className="w-8 h-8">
                                         <path stroke-linecap="round" stroke-linejoin="round"
